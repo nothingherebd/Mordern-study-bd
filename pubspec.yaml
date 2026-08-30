@@ -29,10 +29,6 @@ dependencies:
   shared_preferences: ^2.2.3
   wakelock_plus: ^1.2.5
 
-  # Import/export
-  file_picker: ^8.0.6
-  share_plus: ^9.0.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
