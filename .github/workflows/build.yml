@@ -21,15 +21,31 @@ jobs:
         run: flutter create . --project-name exam_prep --org com.nothingherebd --platforms=android
 
       # flutter_local_notifications needs Java 8+ APIs desugared for it to
-      # run on older Android versions. flutter create's generated
-      # android/app/build.gradle doesn't enable this by default, and since
-      # that file isn't committed to the repo (it's regenerated every run),
-      # we patch it here rather than in a tracked file. Appending a second
-      # android{}/dependencies{} block is valid Groovy DSL — Gradle merges
-      # it with the one flutter create already wrote.
+      # run on older Android versions. flutter create's generated Android
+      # build file doesn't enable this by default, and since that file isn't
+      # committed to the repo (it's regenerated every run), we patch it here
+      # rather than in a tracked file. Recent Flutter versions generate
+      # build.gradle.kts (Kotlin DSL) instead of build.gradle (Groovy), so we
+      # detect which one exists and use the matching syntax — appending a
+      # second android{}/dependencies{} block is valid in both DSLs; Gradle
+      # merges it with the one flutter create already wrote.
       - name: Enable core library desugaring
         run: |
-          cat >> android/app/build.gradle << 'EOF'
+          if [ -f android/app/build.gradle.kts ]; then
+            cat >> android/app/build.gradle.kts << 'EOF'
+
+          android {
+              compileOptions {
+                  isCoreLibraryDesugaringEnabled = true
+              }
+          }
+
+          dependencies {
+              coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+          }
+          EOF
+          else
+            cat >> android/app/build.gradle << 'EOF'
 
           android {
               compileOptions {
@@ -41,6 +57,7 @@ jobs:
               coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
           }
           EOF
+          fi
 
       - name: Install dependencies
         run: flutter pub get
