@@ -29,6 +29,14 @@ dependencies:
   shared_preferences: ^2.2.3
   wakelock_plus: ^1.2.5
 
+# package_info_plus is pulled in transitively (by wakelock_plus) at a version
+# whose Android build.gradle predates the AGP version used by newer Flutter
+# templates, causing "Could not get unknown property 'flutter'" at build
+# time. Forcing a newer version here resolves it without touching any
+# package we depend on directly.
+dependency_overrides:
+  package_info_plus: ^10.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
